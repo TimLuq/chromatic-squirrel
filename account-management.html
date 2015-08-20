@@ -1,0 +1,124 @@
+<link rel="import" href="/bower_components/polymer/polymer.html" />
+
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout.html" />
+<link rel="import" href="/bower_components/paper-card/paper-card.html" />
+<link rel="import" href="/bower_components/paper-button/paper-button.html" />
+<link rel="import" href="/bower_components/paper-item/paper-item.html" />
+<link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html" />
+
+<dom-module id="account-management">
+
+	<style>
+	:host {
+		max-width: 934px;
+		padding: 8px;
+		display: block;
+		@apply(--layout-vertical);
+	}
+	.right { position: absolute; right: 0px; }
+	paper-button.main-btn { color: var(--sqrl-main-button, --sqrl-theme-color); }
+	paper-item paper-toggle-button.right { margin-top: 4px; right: 16px; }
+	paper-item:first-child {
+		border-top: none;
+	}
+	paper-item {
+		border-top: #eee solid thin;
+	}
+	paper-item > div { position: relative; width: 100%; }
+	div[secondary] { color: #999; }
+	:host > div { display: block; flex: 0 0 auto; margin: auto; box-sizing: border-box; padding: 8px; width: 100%; }
+	:host > div.clear { clear:both; }
+	:host > div > paper-card { display: block; margin: auto; flex: 0 0 auto; width: auto; }
+	@media only screen and (min-width: 920px) {
+		:host {
+			display: block !important;
+			width: 920px;
+		}
+		:host > div {
+			float: left;
+			margin: 0px;
+			width: 460px;
+		}
+		:host > div > paper-card {
+			 max-width: 460px;
+		}
+	}
+	@media only screen and (min-width: 1380px) {
+		:host {
+			width: 1380px;
+			max-width: 1400px;
+		}
+		:host > div {
+			float: left;
+			margin: 0px;
+		}
+	}
+	</style>
+
+	<link rel="import" type="css" href="/components/style-theme.css" />
+
+	<template>
+		<div>
+			<paper-card heading$="{{_showUserTitle(selected)}}">
+				<div class="card-content">
+					<p>SQRL frees you from the burden of logging into Internet websites by doing it for you. But this means if someone else gained control of your SQRL app, they could impersonate you.</p>
+					<p>We solve this problem with a SQRL password which YOU use to login to your SQRL. You decide how much login protection you need. You choose your own password of whatever length and complexity you desire. To impede someone guessing, you set how long any password takes to process. And to make longer, more complex passwords less painful to use, the password's first four characters may be used to "refresh" the full password you recently entered.</p>
+					<p>You are free to change your password and its various settings at any time. And if you should ever forget or lose your password for any reason, SQRL's Rescue Code can be used to recover your access.</p>
+					<paper-item>
+						<div>
+							<paper-toggle-button class="right"></paper-toggle-button>
+							<div>Enable password hints</div>
+						</div>
+					</paper-item>
+				</div>
+				<div class="card-actions">
+					<paper-button>Rename identity</paper-button>
+					<paper-button class="main-btn">Save changes</paper-button>
+				</div>
+			</paper-card>
+		</div>
+		<div>
+			<paper-card heading="Identity Backup">
+				<div class="card-content">
+					<p>To be safe you should always have a complete backup of your identity.
+					   If you have no backup and you lose your identity all your account will be lost as well and unable to recover.</p>
+					<p>An identity may be exported together with the existing password for convenience or only be imported using the <emph>Rescue Code</emph>.
+					   The latter is good for long time storage.</p>
+				</div>
+				<div class="card-actions">
+					<paper-button>Backup identity</paper-button>
+					<paper-button class="main-btn">Backup with password</paper-button>
+				</div>
+			</paper-card>
+		</div>
+		<div>
+			<paper-card heading="Password management">
+				<div class="card-content">
+					<p>Hopefully you should not have to change password too many times since it is better to have a single high entropy password which you than may remember for a long time.</p>
+					<p>You may also change the time spent unlocking your account by changing password. Remember that more time results in better security.</p>
+				</div>
+				<div class="card-actions">
+					<paper-button>Reset password</paper-button>
+					<paper-button class="main-btn">Change password</paper-button>
+				</div>
+			</paper-card>
+		</div>
+		<div class="clear"></div>
+	</template>
+	
+	<script>
+	Polymer({
+		is: "account-management",
+		properties: {
+			'selected': {
+				type: String,
+				value: ''
+			}
+		},
+		_showUserTitle: function (selected) {
+			return "Welcome " + selected + "!";
+		}
+	});
+	</script>
+
+</dom-module>
