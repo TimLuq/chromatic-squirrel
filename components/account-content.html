@@ -1,0 +1,88 @@
+
+<dom-module id="account-content">
+	<style>
+	:host > paper-tabs paper-tab {
+		text-align: center;
+	}
+	:host > neon-animated-pages > div {
+		@apply(--layout-center);
+	}
+	:host > neon-animated-pages > div > * {
+		margin: auto;
+	}
+	</style>
+	<template>
+		<paper-tabs selected="{{selectedIndex}}">
+			<paper-tab><div><iron-icon icon="social:people"></iron-icon><div>Identities</div></div></paper-tab>
+			<paper-tab disabled$="{{accountTabDisabled}}"><div><iron-icon icon="account-circle"></iron-icon><div>Account management</div></div></paper-tab>
+			<paper-tab disabled$="{{askTabDisabled}}"><div><iron-icon icon="communication:message"></iron-icon><div>Message and actions</div></div></paper-tab>
+		</paper-tabs>
+		<neon-animated-pages id="pages" class="flex" selected="[[selectedIndexCopy]]" entry-animation="[[entryAnimation]]" exit-animation="[[exitAnimation]]">
+			<div><profile-list selected="{{selectedProfile}}"></profile-list></div>
+			<div><account-management selected="{{selectedProfile}}"></account-management></div>
+			<div></div>
+		</neon-animated-pages>
+	</template>
+	<script>
+	Polymer({
+		is: "account-content",
+		properties: {
+			selectedIndex: {
+				type: Number,
+				value: 0,
+				observer: '_selectedIndexChanged'
+			},
+			selectedIndexCopy: {
+				type: Number,
+				value: 0
+			},
+			selectedProfile: {
+				type: String,
+				value: '',
+				observer: '_selectedProfileChanged'
+			},
+			accountTabDisabled: {
+				type: Boolean,
+				value: true,
+			},
+			askTabDisabled: {
+				type: Boolean,
+				value: true,
+			},
+			entryAnimation: {
+				type: String,
+				value: ''
+			},
+			exitAnimation: {
+				type: String,
+				value: ''
+			}
+		},
+		_selectedIndexChanged: function(newIndex, oldIndex) {
+			if (typeof oldIndex === 'number' && typeof newIndex === 'number') {
+				//this.oldSelectedMessage = 'Before, you had item #' + oldIndex + ' selected.';
+				//var i = Math.min(oldIndex, newIndex) + 2, l = Math.max(oldIndex, newIndex), b = newIndex < oldIndex;
+				this.accountTabDisabled = newIndex < 1;
+				this.askTabDisabled = newIndex < 2;
+				if (newIndex == 0) this.selectedProfile = '';
+				//while (i <= l) { this.querySelector('paper-tabs paper-tab:nth-child('+i+')').disabled=b; i++; }
+				//while (i <= l) { this.querySelector('paper-tabs paper-tab:nth-child('+i+')')[b?'setAttribute':'removeAttribute']('disabled', ""); i++; }
+				
+				this.entryAnimation = newIndex > oldIndex ? 'slide-from-right-animation' : 'slide-from-left-animation';
+				this.exitAnimation = newIndex > oldIndex ? 'slide-left-animation' : 'slide-right-animation';
+				this.selectedIndexCopy = newIndex;
+			}
+		},
+		_selectedProfileChanged: function(newIndex, oldIndex) {
+			if (typeof newIndex === 'string') {
+				if (this.selectedIndex == 0 && newIndex != '') {
+					this.selectedIndex = 1;
+				} else if (this.selectedIndex != 0) {
+					this.selectedIndex = 0;
+				}
+			}
+		}
+	});
+	</script>
+</dom-module>
+
