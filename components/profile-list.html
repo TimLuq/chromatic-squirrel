@@ -1,0 +1,71 @@
+<link rel="import" href="/bower_components/polymer/polymer.html" />
+
+<link rel="import" href="/bower_components/iron-icon/iron-icon.html" />
+<link rel="import" href="/bower_components/iron-icons/social-icons.html" />
+<link rel="import" href="/bower_components/iron-icons/image-icons.html" />
+<link rel="import" href="/bower_components/paper-item/paper-item.html" />
+<link rel="import" href="/bower_components/paper-menu/paper-menu.html" />
+<link rel="import" href="/bower_components/paper-material/paper-material.html" />
+
+<dom-module id="profile-list">
+
+	<style>
+	iron-icon {
+		--iron-icon-height: 48px;
+		--iron-icon-width: 48px;
+		color: #999;
+	}
+	paper-item:first-child {
+		border-top: none;
+	}
+	paper-item {
+		border-top: #eee solid thin;
+	}
+	paper-item > * { 
+		pointer-events: none;
+	}
+	div[secondary] { color: #999; }
+	.right { position: absolute; right: 0px; }
+	</style>
+
+	<template>
+		<paper-material elevation="1">
+			<paper-menu selected-profile="{{selected}}">
+				<template is="dom-repeat" items="{{profiles}}" as="item">
+					<paper-item on-click="_selectedIndexChanged">
+						<iron-icon style="color:rgba(140, 100, 120, 0.8)" icon="social:person"></iron-icon>
+						<paper-item-body two-line>
+							<div>{{item.name}}</div>
+							<div secondary>Last used: <span>{{item.lastUsed}}</span></div>
+						</paper-item-body>
+						<span class="right"><iron-icon icon="image:navigate-next"></iron-icon></span>
+					</paper-item>
+				</template>
+			</paper-menu>
+		</paper-material>
+	</template>
+	
+	<script>
+	Polymer({
+		is: "profile-list",
+		ready: function() {
+			this.profiles = [
+				{name:"Alice", lastUsed:'never'}, {name:"Bob",lastUsed:'never'}
+			];
+		},
+		properties: {
+			'selected': {
+				type: String,
+				value: '',
+				notify: true
+			}
+		},
+		_selectedIndexChanged: function(e) {
+			var t = e.currentTarget.querySelector('paper-item-body>div').textContent;
+			console.log("selected identity '" + t + "'");
+			this.selected = t;
+		}
+	});
+	</script>
+
+</dom-module>
