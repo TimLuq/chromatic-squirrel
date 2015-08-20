@@ -1,0 +1,14 @@
+:root, paper-toggle-button {
+    --paper-toggle-button-checked-bar-color: /*#975687;*/ #872657;
+    --paper-toggle-button-checked-button-color: #872657;
+    --paper-toggle-button-checked-ink-color: #872657;
+}
+:root {
+    --sqrl-theme-color: /*#975687;*/ #872657;
+    --sqrl-theme-light: #C393AB;
+}
+
+--sqrl-theme-block {
+    background-color: #872657;
+    color:#fff;
+}
