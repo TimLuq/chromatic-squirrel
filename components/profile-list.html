@@ -6,6 +6,7 @@
 <link rel="import" href="/bower_components/paper-item/paper-item.html" />
 <link rel="import" href="/bower_components/paper-menu/paper-menu.html" />
 <link rel="import" href="/bower_components/paper-material/paper-material.html" />
+<link rel="import" href="/bower_components/paper-fab/paper-fab.html" />
 
 <dom-module id="profile-list">
 
@@ -26,7 +27,11 @@
 	}
 	div[secondary] { color: #999; }
 	.right { position: absolute; right: 0px; }
+	:host > paper-fab { position: fixed; right: 4px; bottom: 4px; }
 	</style>
+
+	
+	<link rel="import" type="css" href="/components/style-theme.css" />
 
 	<template>
 		<paper-material elevation="1">
@@ -43,6 +48,7 @@
 				</template>
 			</paper-menu>
 		</paper-material>
+		<paper-fab icon="add" on-click="_addIdentity"></paper-fab>
 	</template>
 	
 	<script>
@@ -64,6 +70,9 @@
 			var t = e.currentTarget.querySelector('paper-item-body>div').textContent;
 			console.log("selected identity '" + t + "'");
 			this.selected = t;
+		},
+		_addIdentity: function (e) {
+			// TODO: open import and creation choice
 		}
 	});
 	</script>
