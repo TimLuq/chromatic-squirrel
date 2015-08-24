@@ -6,14 +6,15 @@
 <link rel="import" href="/bower_components/paper-item/paper-item.html" />
 <link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html" />
 
+<link rel="import" href="/components/anti-gravity.html" />
+<link rel="import" href="/components/anti-gravity-item.html" />
+
 <dom-module id="account-management">
 
 	<style>
 	:host {
-		max-width: 934px;
 		padding: 8px;
 		display: block;
-		@apply(--layout-vertical);
 	}
 	.right { position: absolute; right: 0px; }
 	paper-button.main-btn { color: var(--sqrl-main-button, --sqrl-theme-color); }
@@ -24,86 +25,140 @@
 	paper-item {
 		border-top: #eee solid thin;
 	}
-	paper-item > div { position: relative; width: 100%; }
+	paper-card { display: flex; flex-direction: row; margin: 8px; flex: 1 0 auto; width: auto; }
+	paper-card > div.card-content { flex: 1 0 auto; }
+	paper-item > div, paper-item > div > div { position: relative; width: 100%; display: block; }
 	div[secondary] { color: #999; }
-	:host > div { display: block; flex: 0 0 auto; margin: auto; box-sizing: border-box; padding: 8px; width: 100%; }
-	:host > div.clear { clear:both; }
-	:host > div > paper-card { display: block; margin: auto; flex: 0 0 auto; width: auto; }
-	@media only screen and (min-width: 920px) {
-		:host {
-			display: block !important;
-			width: 920px;
-		}
-		:host > div {
-			float: left;
-			margin: 0px;
-			width: 460px;
-		}
-		:host > div > paper-card {
-			 max-width: 460px;
-		}
-	}
-	@media only screen and (min-width: 1380px) {
-		:host {
-			width: 1380px;
-			max-width: 1400px;
-		}
-		:host > div {
-			float: left;
-			margin: 0px;
-		}
-	}
 	</style>
 
 	<link rel="import" type="css" href="/components/style-theme.css" />
 
 	<template>
-		<div>
-			<paper-card heading$="{{_showUserTitle(selected)}}">
-				<div class="card-content">
-					<p>SQRL frees you from the burden of logging into Internet websites by doing it for you. But this means if someone else gained control of your SQRL app, they could impersonate you.</p>
-					<p>We solve this problem with a SQRL password which YOU use to login to your SQRL. You decide how much login protection you need. You choose your own password of whatever length and complexity you desire. To impede someone guessing, you set how long any password takes to process. And to make longer, more complex passwords less painful to use, the password's first four characters may be used to "refresh" the full password you recently entered.</p>
-					<p>You are free to change your password and its various settings at any time. And if you should ever forget or lose your password for any reason, SQRL's Rescue Code can be used to recover your access.</p>
-					<paper-item>
-						<div>
-							<paper-toggle-button class="right"></paper-toggle-button>
-							<div>Enable password hints</div>
-						</div>
-					</paper-item>
-				</div>
-				<div class="card-actions">
-					<paper-button>Rename identity</paper-button>
-					<paper-button class="main-btn">Save changes</paper-button>
-				</div>
-			</paper-card>
-		</div>
-		<div>
-			<paper-card heading="Identity Backup">
-				<div class="card-content">
-					<p>To be safe you should always have a complete backup of your identity.
-					   If you have no backup and you lose your identity all your account will be lost as well and unable to recover.</p>
-					<p>An identity may be exported together with the existing password for convenience or only be imported using the <emph>Rescue Code</emph>.
-					   The latter is good for long time storage.</p>
-				</div>
-				<div class="card-actions">
-					<paper-button>Backup identity</paper-button>
-					<paper-button class="main-btn">Backup with password</paper-button>
-				</div>
-			</paper-card>
-		</div>
-		<div>
-			<paper-card heading="Password management">
-				<div class="card-content">
-					<p>Hopefully you should not have to change password too many times since it is better to have a single high entropy password which you than may remember for a long time.</p>
-					<p>You may also change the time spent unlocking your account by changing password. Remember that more time results in better security.</p>
-				</div>
-				<div class="card-actions">
-					<paper-button>Reset password</paper-button>
-					<paper-button class="main-btn">Change password</paper-button>
-				</div>
-			</paper-card>
-		</div>
-		<div class="clear"></div>
+		<anti-gravity column-width="460">
+			<template is="dom-repeat" items="{{priorityCards}}" as="card" index-as="cardindex">
+				<template is="dom-if" if="{{card}}">
+					<anti-gravity-item class="priorityCards" data-cardindex$="{{cardindex}}">
+						<paper-card heading="{{card.heading}}">
+							<div class="card-content">
+								<template is="dom-repeat" items="{{card.paragraphs}}" as="par">
+									<p>{{par}}</p>
+								</template>
+							</div>
+							<template is="dom-if" if="{{_hasAction(card)}}">
+								<div class="card-actions">
+									<template is="dom-if" if="{{card.secondaryAction}}">
+										<paper-button on-click="_accountAction" data-action="x-priority/secondary" data-xindex$="{{cardindex}}">{{card.secondaryAction}}</paper-button>
+									</template>
+									<template is="dom-if" if="{{card.primaryAction}}">
+										<paper-button class="main-btn" on-click="_accountAction" data-action="x-priority/primary" data-xindex$="{{cardindex}}">{{card.primaryAction}}</paper-button>
+									</template>
+								</div>
+							</template>
+						</paper-card>
+					</anti-gravity-item>
+				</template>
+			</template>
+			<anti-gravity-item>
+				<paper-card heading$="{{_showUserTitle(selected)}}">
+					<div class="card-content">
+						<p>SQRL frees you from the burden of logging into Internet websites by doing it for you. But this means if someone else gained control of your SQRL app, they could impersonate you.</p>
+						<p>We solve this problem with a SQRL password which YOU use to login to your SQRL. You decide how much login protection you need. You choose your own password of whatever length and complexity you desire. To impede someone guessing, you set how long any password takes to process. And to make longer, more complex passwords less painful to use, the password's first four characters may be used to "refresh" the full password you recently entered.</p>
+						<p>You are free to change your password and its various settings at any time. And if you should ever forget or lose your password for any reason, SQRL's Rescue Code can be used to recover your access.</p>
+						<paper-item>
+							<div class="item-content">
+								<div>
+									<paper-toggle-button class="right" checked="{{allowHint}}" data-setting="hint/enable"></paper-toggle-button>
+									<div>Enable password hints</div>
+								</div>
+								<div>
+									<paper-toggle-button class="right" disabled$="{{!allowHint}}" data-setting="hint/clear-on-blank"></paper-toggle-button>
+									<div>Clear hint during blanking</div>
+								</div>
+								<div>
+									<paper-toggle-button class="right" disabled$="{{!allowHint}}" data-setting="hint/clear-on-userswitch"></paper-toggle-button>
+									<div>Clear hint at user change</div>
+								</div>
+							</div>
+						</paper-item>
+					</div>
+					<div class="card-actions">
+						<paper-button on-click="_accountAction" data-action="itentity/rename">Rename identity</paper-button>
+						<paper-button class="main-btn" on-click="_accountAction" data-action="settings/save">Save changes</paper-button>
+					</div>
+				</paper-card>
+			</anti-gravity-item>
+			<anti-gravity-item>
+				<paper-card heading="Identity Backup">
+					<div class="card-content">
+						<p>To be safe you should always have a complete backup of your identity.
+							If you have no backup and you lose your identity all your account will be lost as well and unable to recover.</p>
+						<p>An identity may be exported together with the existing password for convenience or only be imported using the <emph>Rescue Code</emph>.
+							The latter is good for long time storage.</p>
+					</div>
+					<div class="card-actions">
+						<paper-button on-click="_accountAction" data-action="backup/nopass">Backup identity</paper-button>
+						<paper-button class="main-btn" on-click="_accountAction" data-action="backup/wpass">Backup with password</paper-button>
+					</div>
+				</paper-card>
+			</anti-gravity-item>
+			<anti-gravity-item>
+				<paper-card heading="Password management">
+					<div class="card-content">
+						<p>Hopefully you should not have to change password too many times since it is better to have a single high entropy password which you than may remember for a long time.</p>
+						<p>You may also change the time spent unlocking your account by changing password. Remember that more time results in better security.</p>
+					</div>
+					<div class="card-actions">
+						<paper-button on-click="_accountAction" data-action="pass/reset">Reset password</paper-button>
+						<paper-button class="main-btn" on-click="_accountAction" data-action="pass/change">Change password</paper-button>
+					</div>
+				</paper-card>
+			</anti-gravity-item>
+			<anti-gravity-item>
+				<paper-card heading="Identity deletion">
+					<div class="card-content">
+						<p>When you delete an identity only the local identity is removed. Any association of your identity to any application or web page will still be in place and may be used from another client where it is loaded. You may later restore your identity from a previous backup.</p>
+						<p>Make sure you have a backup before taking this step. Unless you have a backup this identity is permanently destroyed.</p>
+					</div>
+					<div class="card-actions">
+						<paper-button class="main-btn" on-click="_accountAction" data-action="identity/delete">Delete identity</paper-button>
+					</div>
+				</paper-card>
+			</anti-gravity-item>
+			<anti-gravity-item>
+				<paper-card heading="Test Card">
+					<div class="card-content">
+						<p>Actions related to testing.</p>
+					</div>
+					<div class="card-actions">
+						<paper-button on-click="_accountAction" data-action="test/add-priority">Create priority card</paper-button>
+						<paper-button on-click="_accountAction" data-action="test/add-additional">Create additional card</paper-button>
+					</div>
+				</paper-card>
+			</anti-gravity-item>
+			<template is="dom-repeat" items="{{additionalCards}}" as="card" index-as="cardindex">
+				<template is="dom-if" if="{{card}}">
+					<anti-gravity-item class="additionalCards" data-cardindex$="{{cardindex}}">
+						<paper-card heading="{{card.heading}}">
+							<div class="card-content">
+								<template is="dom-repeat" items="{{card.paragraphs}}" as="par">
+									<p>{{par}}</p>
+								</template>
+							</div>
+							<template is="dom-if" if="{{_hasAction(card)}}">
+								<div class="card-actions">
+									<template is="dom-if" if="{{card.secondaryAction}}">
+										<paper-button on-click="_accountAction" data-action="x-additional/secondary" data-xindex$="{{cardindex}}">{{card.secondaryAction}}</paper-button>
+									</template>
+									<template is="dom-if" if="{{card.primaryAction}}">
+										<paper-button class="main-btn" on-click="_accountAction" data-action="x-additional/primary" data-xindex$="{{cardindex}}">{{card.primaryAction}}</paper-button>
+									</template>
+								</div>
+							</template>
+						</paper-card>
+					</anti-gravity-item>
+				</template>
+			</template>
+		</anti-gravity>
 	</template>
 	
 	<script>
@@ -112,11 +167,181 @@
 		properties: {
 			'selected': {
 				type: String,
-				value: ''
+				value: '',
+				notify: true,
+				observer: '_cardsAttached'
+			},
+			'allowHint': {
+				type: Boolean,
+				value: true
+			},
+			'priorityCards': {
+				type: Array,
+				value: [],
+				notify: true,
+				observer: '_cardsAttached'
+			},
+			'additionalCards': {
+				type: Array,
+				value: [],
+				notify: true,
+				observer: '_cardsAttached'
 			}
+		},
+		_hasAction: function (card) {
+			return card.primaryAction||card.secondaryAction;
 		},
 		_showUserTitle: function (selected) {
 			return "Welcome " + selected + "!";
+		},
+		_accountAction: function (e) {
+			var act = e.currentTarget.dataset['action'], t, s;
+			console.log("User action:", act);
+			if (act == "settings/save") {
+				t = Array.prototype.slice.call(e.currentTarget.parentNode.parentNode.querySelectorAll('paper-toggle-button'));
+				s = t.reduce(function (x, el) { x[el.dataset['setting']] = el.checked; return x; }, {});
+				console.log('Data to save: ', t);
+			}
+			else if (act.substring(0, 13) == 'x-additional/') {
+				t = parseInt(e.currentTarget.dataset['xindex']);
+				s = this.additionalCards[t].callback.call(window, act.substring(13), this.additionalCards[t], this);
+			}
+			else if (act.substring(0, 11) == 'x-priority/') {
+				t = parseInt(e.currentTarget.dataset['xindex']);
+				s = this.priorityCards[t].callback.call(window, act.substring(11), this.priorityCards[t], this);
+			}
+			else if (act == 'test/add-priority') {
+				t = new Date();
+				this.addPriorityCards({
+					id: 'test/add-priority/gen-' + t.getTime(),
+					cardClass: 'test/add-priority',
+					heading: 'Priority test - ' + t.toLocaleTimeString(),
+					paragraphs: ['Test paragraph 1.', 'Test paragraph 2.'],
+					callback: function (button, card, container) {
+						container.removeCard(card.id);
+					},
+					primaryAction: "Dissmiss"
+				});
+			}
+			else if (act == 'test/add-additional') {
+				t = new Date();
+				this.addAdditionalCards({
+					id: 'test/add-additional/gen-' + t.getTime(),
+					cardClass: 'test/add-additional',
+					heading: 'Additional test - ' + t.toLocaleTimeString(),
+					content: 'This only has one paragraph.',
+					callback: function (button, card, container) {
+						container.removeCard(card.id);
+					},
+					primaryAction: "Dissmiss"
+				});
+			}
+		},
+		attached: function () {
+			/*super.attached();*/
+			
+			this._cardsAttached.apply(this, arguments);
+		},
+		_cardsAttached: function () {
+			var f = function () {
+				Polymer.dom.flush();
+				var tryAgain = false, i, t = this.querySelectorAll('div.account-management > paper-card > paper-material'), l = t.length, s, steps = 40;
+				for (i = 0; i < l; i++) {
+					s = t[i].offsetHeight;
+					if (s == 0) {
+						tryAgain = true;
+						continue;
+					}
+					if (s % steps != 0) {
+						s += steps - (s % steps);
+					}
+					t[i].style.height = s + 'px';
+					t[i].style.flexDirection = 'column';
+					t[i].style.display = 'flex';
+					Array.prototype.map.call(t[i].querySelectorAll('div.card-content'), function (e) { e.style.flex = '1 1 auto'; });
+					Array.prototype.map.call(t[i].querySelectorAll('div.card-actions, div.header'), function (e) { e.style.flex = '0 0 auto'; });
+				}
+			};
+			this.async(f);
+		},
+		_not: function (x) { return !x; },
+		_cloneExtraCards: function (key, cards) {
+			var i, t, j;
+			for (i = 0; i < cards.length; i++) {
+				t = {};
+				for (j in cards[i]) {
+					switch (j) {
+					case 'content':
+						t.paragraphs = t.paragraphs || [];
+						t.paragraphs.push(cards[i][j]);
+						break;
+					case 'paragraphs':
+					case 'heading':
+					case 'cardClass':
+					case 'id':
+					case 'primaryAction':
+					case 'secondaryAction':
+					case 'callback':
+						t[j] = cards[i][j];
+						break;
+					}
+				}
+				this.push(key, t);
+			}
+		},
+		addAdditionalCards: function () { this._cloneExtraCards.call(this, 'additionalCards', arguments); },
+		addPriorityCards: function () { this._cloneExtraCards.call(this, 'priorityCards', arguments); },
+		updateCard: function (card, prop, value) {
+			var i, j, k, b, a = [this.additionalCards, 'additionalCards', this.priorityCards, 'priorityCards'];
+			if (typeof card == 'string') { card = { id: card }; }
+			for (i = 0; i < a.length; i += 2) {
+				for (j = 0; j < a[i].length; j++) {
+					if (!a[i][j]) continue;
+					b = true;
+					for (k in card) {
+						if (!card.hasOwnProperty(k)) continue;
+						if (card[k] != a[i][j][k]) {
+							b = false;
+							break;
+						}
+					}
+					if (!b) continue;
+					this.set(a[i+1] + "." + j + "." + prop, value);
+				}
+			}
+		},
+		removeCard: function (card) {
+			var i, j, k, b, a = [this.additionalCards, 'additionalCards', this.priorityCards, 'priorityCards'], el, els = [];
+			if (typeof card == 'string') { card = { id: card }; }
+			for (i = 0; i < a.length; i += 2) {
+				for (j = 0; j < a[i].length; j++) {
+					if (!a[i][j]) continue;
+					b = true;
+					for (k in card) {
+						if (!card.hasOwnProperty(k)) continue;
+						if (card[k] != a[i][j][k]) {
+							b = false;
+							break;
+						}
+					}
+					if (!b) continue;
+					el = this.querySelector('anti-gravity-item.' + a[i+1] + '[data-cardindex="' + j + '"]');
+					this.appendChild(el);
+					el.style.opacity = 0;
+					el.style.height = '0px';
+					els.push(el);
+					this.set(a[i+1] + '.' + j, undefined);
+				}
+			}
+			if (el) {
+				this.querySelector('anti-gravity')._recalculate();
+				setTimeout(function () {
+					var i;
+					for (i = 0; i < els.length; i++) {
+						els[i].parentNode.removeChild(els[i]);
+					}
+				}, 710);
+			}
 		}
 	});
 	</script>
