@@ -1,0 +1,33 @@
+<link rel="import" href="/bower_components/polymer/polymer.html" />
+
+<dom-module id="anti-gravity-item">
+
+	<style>
+	:host, :host > div.anti-gravity-item-container {
+		display: flex;
+		flex-direction: column;
+		box-sizing: border-box;
+		width: auto;
+		flex: 1 0 auto;
+	}
+	</style>
+
+	<template>
+		<div class="anti-gravity-item-container">
+			<content></content>
+		</div>
+	</template>
+	
+	<script>
+	Polymer({
+		is: "anti-gravity-item",
+		properties: {
+			'weight': {
+				type: Number,
+				value: 1000
+			}
+		}
+	});
+	</script>
+
+</dom-module>
