@@ -1,0 +1,163 @@
+<link rel="import" href="/bower_components/polymer/polymer.html" />
+
+<link rel="import" href="/bower_components/iron-flex-layout/iron-flex-layout.html" />
+<link rel="import" href="/bower_components/paper-card/paper-card.html" />
+<link rel="import" href="/bower_components/paper-button/paper-button.html" />
+<link rel="import" href="/bower_components/paper-item/paper-item.html" />
+<link rel="import" href="/bower_components/paper-toggle-button/paper-toggle-button.html" />
+<link rel="import" href="/components/anti-gravity-item.html" />
+
+<dom-module id="anti-gravity">
+
+	<style>
+	:host {
+		display: block;
+		align-items: center;
+	}
+	:host > div.anti-gravity-container {
+		display: block;
+		position: relative;
+		margin: auto;
+	}
+	</style>
+
+	<link rel="import" type="css" href="/components/style-theme.css" />
+
+	<template>
+		<div class="anti-gravity-container">
+			<content select="anti-gravity-item"></content>
+		</div>
+	</template>
+	
+	<script>
+	(function () {
+		var e = document.getElementById('detect-element-resize-js');
+		if (e) return;
+		e = document.createElement('script');
+		e.id = 'detect-element.resize-js';
+		e.type = 'application/javascript';
+		e.async = false;
+		e.defer = false;
+		e.src = '/bower_components/javascript-detect-element-resize/detect-element-resize.js';
+		(document.head || document.querySelector('head')).appendChild(e);
+	}());
+	Polymer({
+		is: "anti-gravity",
+		properties: {
+			'columnWidth': {
+				type: Number,
+				value: 256,
+				observer: '_recalculate'
+			},
+			'maxColumns': {
+				type: Number,
+				value: -1,
+				observer: '_recalculate'
+			},
+			'_columnElements': {
+				type: Array,
+				value: []
+			},
+			'_mo': {
+				type: Function,
+				value: function () {}
+			}
+		},
+		ready: function () {
+			var t = this;
+			this._mo = new MutationObserver(function (mutations) {
+				mutations.forEach(function(mutation) {
+					console.log("node added or removed detected:", mutation);
+					// add in your tasks when node is added/removed here
+				});
+				t._recalculate();
+			});
+			this._mo.observe(this.querySelector('div.anti-gravity-container'), {
+				// configure `childList` to be true to listen to node addition/deletion
+				childList: true
+			});
+			setTimeout(function () { window.addResizeListener(t, t._recalculate); }, 100);
+		},
+		_lowestIndex: function (items) {
+			var r = 0, i, l = items.length;
+			for (i = 1; i < l; i++) {
+				if (items[i] < items[r]) r = i;
+			}
+			return r;
+		},
+		attached: function () {
+			this.async(function () { setTimeout(this._recalculate.bind(this), 100); });
+		},
+		_recalculate: function () {
+			Polymer.dom.flush();
+			this.async(function () {
+				var i, all = this.querySelectorAll('div.anti-gravity-container > anti-gravity-item');
+				if (!this.offsetWidth) return;
+				for (i = 0; i < all.length; i++) {
+					all[i].style.height = 'auto';
+				}
+				this.async(function () {
+					var c, j, i, cols, elw, colh, asy = [], wh, h;
+					elw = Math.floor(this.columnWidth < 1 ? this.offsetWidth : this.columnWidth);
+					cols = Math.floor(this.offsetWidth / elw);
+					if (isNaN(cols) || cols < 1) cols = 1;
+					if (this.maxColumns >= 1 && this.maxColumns < cols) cols = this.maxColumns;
+					if (cols == 1) elw = Math.floor(this.offsetWidth);
+					(c = this.querySelector('div.anti-gravity-container')).style.width = (cols * elw) + 'px';
+					colh = [];
+					colh.length = cols;
+					this._columnElements.length = cols;
+					for (j = 0; j < cols; j++) {
+						colh[j] = 0;
+						this._columnElements[j] = [];
+					}
+					wh = (Math.max(window.scrollHeight || 0, window.innerHeight || 0) + 40 + this.offsetHeight) + 'px';
+					for (i = 0; i < all.length; i++) {
+						h = all[i].offsetHeight;
+						if (h & 0x0f) h += 16 - (h & 0x0f);
+						all[i].style.width = elw + 'px';
+						all[i].style.height = h + 'px';
+						if (all[i].style.position == 'absolute') {
+							j = this._lowestIndex(colh);
+							this._columnElements[j].push(all[i]);
+							all[i].style.left = (elw * j) + 'px';
+							all[i].style.top  = colh[j] + 'px';
+							colh[j] += h;
+						} else {
+							all[i].style.position = 'absolute';
+							all[i].style.top = wh;
+							j = this._lowestIndex(colh);
+							this._columnElements[j].push(all[i]);
+							all[i].style.left = (elw * j) + 'px';
+							asy.push([all[i], colh[j] + 'px']);
+							colh[j] += h;
+						}
+					}
+					i = colh[0];
+					for (j = 1; j < cols; j++) {
+						if (colh[j] > i) i = colh[j];
+					}
+					if (!c.style.height) {
+						c.style.height = i + 'px';
+					}
+					Polymer.dom.flush();
+					if (asy.length) {
+						this.async(function () {
+							var i, l = asy.length, j = 'left 500ms ease-in-out, top 700ms ease-out, height 700ms ease-in-out, opacity 500ms ease-in-out';
+							for (i = 0; i < l; i++) {
+								asy[i][0].style.setProperty("-webkit-transition", j);
+								asy[i][0].style.setProperty("-moz-transition", j);
+								asy[i][0].style.setProperty("-ms-transition", j);
+								asy[i][0].style.setProperty("-o-transition", j);
+								asy[i][0].style.transition = j;
+								asy[i][0].style.top = asy[i][1];
+							}
+						});
+					}
+				});
+			});
+		}
+	});
+	</script>
+
+</dom-module>
