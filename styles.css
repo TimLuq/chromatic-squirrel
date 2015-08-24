@@ -42,3 +42,8 @@ paper-tabs {
 paper-tabs[noink][nobar] paper-tab.core-selected {
   color: #ffff8d;
 }
+
+
+paper-card > paper-material {
+    width: 100%;
+}
